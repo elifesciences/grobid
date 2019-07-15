@@ -53,6 +53,7 @@ public class DeLFTModel {
         public void run() { 
             Jep jep = JEPThreadPool.getInstance().getJEPInstance(); 
             try { 
+                LOGGER.debug("DeLFTModel, loading model: {}", modelPath.getAbsolutePath());
                 jep.eval(this.modelName+" = Sequence('" + this.modelName.replace("_", "-") + "')");
                 jep.eval(this.modelName+".load(dir_path='"+modelPath.getAbsolutePath()+"')");
             } catch(JepException e) {
@@ -76,7 +77,7 @@ public class DeLFTModel {
             Jep jep = JEPThreadPool.getInstance().getJEPInstance(); 
             StringBuilder labelledData = new StringBuilder();
             try {
-                //System.out.println(this.data);
+                LOGGER.debug("DeLFTModel LabelTask, data:\n{}", this.data);
 
                 // load and tag
                 jep.set("input", this.data);
