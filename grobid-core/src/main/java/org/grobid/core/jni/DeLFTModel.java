@@ -80,9 +80,25 @@ public class DeLFTModel {
 
                 // load and tag
                 jep.set("input", this.data);
+                Boolean useFeatures = jep.getValue(
+                    "getattr(" + this.modelName + ".model_config, 'use_features', False)",
+                    Boolean.class
+                );
+                LOGGER.debug("useFeatures: {}", useFeatures);
                 jep.eval("x_all, f_all = load_data_crf_string(input)");
-                Object objectResults = jep.getValue(this.modelName+".tag(x_all, None)");
-                
+                Object objectResults;
+                if (useFeatures) {
+                    objectResults = jep.getValue(
+                        this.modelName + ".tag(x_all, None, features=f_all)"
+                    );
+                } else {
+                    // Note: this doesn't improve performance as we'd just pass in a reference
+                    //   but it is making it backwards compatible.
+                    objectResults = jep.getValue(
+                        this.modelName + ".tag(x_all, None)"
+                    );
+                }
+
                 // inject back the labels
                 ArrayList<ArrayList<List<String>>> results = (ArrayList<ArrayList<List<String>>>)objectResults;
                 BufferedReader bufReader = new BufferedReader(new StringReader(data));
