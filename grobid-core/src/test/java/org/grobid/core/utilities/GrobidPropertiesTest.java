@@ -61,6 +61,18 @@ public class GrobidPropertiesTest {
                 .getNativeLibraryPath().getCanonicalFile());
     }
 
+    @Test
+    public void testShouldReturnEmptyTrainArgsByDefault() {
+        GrobidProperties.getProps().remove(GrobidPropertyKeys.PROP_GROBID_DELFT_TRAIN_ARGS);
+        assertEquals(GrobidProperties.getDeLFTTrainArgs(), "");
+    }
+
+    @Test
+    public void testShouldReturnConfiguredTrainArgs() {
+        GrobidProperties.getProps().put(GrobidPropertyKeys.PROP_GROBID_DELFT_TRAIN_ARGS, "args");
+        assertEquals(GrobidProperties.getDeLFTTrainArgs(), "args");
+    }
+
     @Test(expected = GrobidPropertyException.class)
     public void testCheckPropertiesException_shouldThrowException() {
         GrobidProperties.getProps().put(
