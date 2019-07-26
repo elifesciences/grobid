@@ -435,6 +435,12 @@ public class GrobidProperties {
         return pathFile.getAbsolutePath();
     }
 
+    public static String getDeLFTTrainModule() {
+        return getPropertyValue(
+            GrobidPropertyKeys.PROP_GROBID_DELFT_TRAIN_MODULE, ""
+        );
+    }
+
     public static String getDeLFTTrainArgs() {
         return getPropertyValue(GrobidPropertyKeys.PROP_GROBID_DELFT_TRAIN_ARGS, "");
     }
