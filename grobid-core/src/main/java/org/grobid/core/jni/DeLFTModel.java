@@ -233,6 +233,7 @@ public class DeLFTModel {
         try {
             LOGGER.info("Train DeLFT model " + modelName + "...");
             List<String> command = getTrainCommand(modelName, trainingData, outputModel);
+            LOGGER.info("Running: {}", command);
 
             ProcessBuilder pb = new ProcessBuilder(command);
             File delftPath = new File(GrobidProperties.getInstance().getDeLFTFilePath());
