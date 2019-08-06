@@ -357,8 +357,9 @@ public class Document implements Serializable {
             saxParser.parse(in, handler);
         } else {
             CharsetDecoder utf8Decoder = Charset.forName("UTF-8").newDecoder();
-            utf8Decoder.onMalformedInput(CodingErrorAction.IGNORE);
-            utf8Decoder.onUnmappableCharacter(CodingErrorAction.IGNORE);
+            utf8Decoder.onMalformedInput(CodingErrorAction.REPLACE);
+            utf8Decoder.onUnmappableCharacter(CodingErrorAction.REPLACE);
+            utf8Decoder.replaceWith("?");
             saxParser.parse(new InputSource(new InputStreamReader(in, utf8Decoder)), handler);
         }
     }
