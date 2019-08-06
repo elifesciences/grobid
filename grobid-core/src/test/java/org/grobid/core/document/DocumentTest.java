@@ -46,7 +46,6 @@ public class DocumentTest {
 
     @Test
     public void shouldNotFailToParseValidXml() throws Exception {
-        byte[] data = "<xml>test</xml>".getBytes();
         Document.parseInputStream(
             new ByteArrayInputStream(getValidXmlBytes()),
             SAXParserFactory.newInstance(),
