@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.Enumeration;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -301,6 +302,8 @@ public class GrobidProperties {
             throw new GrobidPropertyException("Cannot open file of grobid properties" + getGrobidPropertiesPath().getAbsolutePath(), exp);
         }
 
+        getProps().putAll(getEnvironmentVariableOverrides(System.getenv()));
+
         initializePaths();
         //checkProperties();
         loadPdf2XMLPath();
@@ -337,6 +340,14 @@ public class GrobidProperties {
             }
         }
         return GROBID_VERSION;
+    }
+
+    protected static Map<String, String> getEnvironmentVariableOverrides(Map<String, String> environmentVariablesMap) {
+        Map<String, String> properties = new EnvironmentVariableProperties(
+            environmentVariablesMap, "GROBID__"
+        ).getProperties();
+        LOGGER.info("environment variables overrides: {}", properties);
+        return properties;
     }
 
     /**
