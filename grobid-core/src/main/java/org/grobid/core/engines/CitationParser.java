@@ -160,6 +160,7 @@ public class CitationParser extends AbstractParser {
             if ((bib != null) && !bib.rejectAsReference()) {
                 BibDataSet bds = new BibDataSet();
                 bds.setRefSymbol(ref.getLabel());
+                bib.setReference(ref.getReferenceText());
                 bds.setResBib(bib);
                 bds.setRawBib(ref.getReferenceText());
                 bds.getResBib().setCoordinates(ref.getCoordinates());
@@ -236,6 +237,7 @@ public class CitationParser extends AbstractParser {
                     BibDataSet bds = new BibDataSet();
                     bds.setRefSymbol(ref.getLabel());
                     bds.setResBib(bib);
+                    bib.setReference(ref.getReferenceText());
                     bds.setRawBib(ref.getReferenceText());
                     bds.getResBib().setCoordinates(ref.getCoordinates());
                     results.add(bds);
@@ -679,7 +681,7 @@ public class CitationParser extends AbstractParser {
                         else {
                             Matcher doiMatcher = TextUtilities.DOIPattern.matcher(cleanS2);
                             if (doiMatcher.find())
-                                localTag = "<idno type=\"doi\">";
+                                localTag = "<idno type=\"DOI\">";
                         }
                         output = writeField(s1, lastTag0, s2, "<pubnum>", localTag, addSpace, 0);
                     } else {
