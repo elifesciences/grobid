@@ -85,6 +85,15 @@ public class GrobidAnalysisConfig {
     public static class GrobidAnalysisConfigBuilder {
         GrobidAnalysisConfig config = new GrobidAnalysisConfig();
 
+        public GrobidAnalysisConfigBuilder() {
+        }
+
+        public GrobidAnalysisConfigBuilder(GrobidAnalysisConfig config) {
+            // TODO add more properties
+            this.config.includeRawAffiliations = config.getIncludeRawAffiliations();
+            this.config.includeRawCitations = config.getIncludeRawCitations();
+        }
+
         public GrobidAnalysisConfigBuilder consolidateHeader(int consolidate) {
             config.consolidateHeader = consolidate;
             return this;
@@ -169,6 +178,10 @@ public class GrobidAnalysisConfig {
 
     public static GrobidAnalysisConfigBuilder builder() {
         return new GrobidAnalysisConfigBuilder();
+    }
+
+    public static GrobidAnalysisConfigBuilder builder(GrobidAnalysisConfig config) {
+        return new GrobidAnalysisConfigBuilder(config);
     }
 
     public static GrobidAnalysisConfig defaultInstance() {
