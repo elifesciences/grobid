@@ -31,7 +31,7 @@ import org.grobid.core.utilities.OffsetPosition;
 
 public class AffiliationAddressParserTest {
 
-	public static final Logger LOGGER = LoggerFactory.getLogger(AffiliationAddressParserTest.class);
+    public static final Logger LOGGER = LoggerFactory.getLogger(AffiliationAddressParserTest.class);
 
     private static boolean NO_USE_PRELABEL = false;
     private static List<List<OffsetPosition>> NO_PLACES_POSITIONS = Arrays.asList(
