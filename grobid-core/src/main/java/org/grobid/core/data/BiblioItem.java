@@ -3672,6 +3672,18 @@ public class BiblioItem {
                                 tei.append(" key=\"").append(aff.getKey()).append("\"");
                             tei.append(">\n");
 
+                            if (!StringUtils.isEmpty(aff.getRawAffiliationString())) {
+                                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                                String encodedRawAffiliationString = TextUtilities.HTMLEncode(
+                                    aff.getRawAffiliationString()
+                                );
+                                tei.append(
+                                    "<note type=\"raw_affiliation\">" +
+                                    encodedRawAffiliationString +
+                                    "</note>\n"
+                                );
+                            }
+
                             if (aff.getDepartments() != null) {
                                 if (aff.getDepartments().size() == 1) {
                                     TextUtilities.appendN(tei, '\t', nbTag + 2);
