@@ -2,6 +2,7 @@ package org.grobid.core.engines;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.AfterClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -90,10 +91,12 @@ public class AffiliationAddressParserTest {
         List<String> labels
     ) throws Exception {
         List<LayoutToken> tokenizations = this.analyzer.getLayoutTokensForTokenizedText(tokens);
+        LOGGER.debug("tokenizations: {}", tokenizations);
         List<String> affiliationBlocks = AffiliationAddressParser.getAffiliationBlocks(tokenizations);
         String header = FeaturesVectorAffiliationAddress.addFeaturesAffiliationAddress(
             affiliationBlocks, Arrays.asList(tokenizations), NO_PLACES_POSITIONS
         );
+        LOGGER.debug("header: {}", header);
         String labelResult = addLabelsToFeatures(header, labels);
         LOGGER.debug("labelResult: {}", labelResult);
         return this.target.resultBuilder(
@@ -106,12 +109,16 @@ public class AffiliationAddressParserTest {
     private List<Affiliation> processLabelResults(String[][] tokenLabelPairs) throws Exception {
         ArrayList<String> tokens = new ArrayList<>();
         ArrayList<String> labels = new ArrayList<>();
+        boolean prevWhitespace = false;
         for (String[] pair: tokenLabelPairs) {
-            if (!tokens.isEmpty()) {
+            if (!tokens.isEmpty() && (!prevWhitespace)) {
                 tokens.add(" ");
             }
+            prevWhitespace = pair[0].trim().isEmpty();
             tokens.add(pair[0]);
-            labels.add(pair[1]);
+            if (pair.length > 1) {
+                labels.add(pair[1]);
+            }
         }
         return this.processLabelResults(tokens, labels);
     }
@@ -146,6 +153,29 @@ public class AffiliationAddressParserTest {
             {"Madness", "<institution>"}
         });
         assertThat("should have one affiliation", affiliations, is(hasSize(1)));
+        Affiliation affiliation = affiliations.get(0);
+        assertThat("institution.marker", affiliation.getMarker(), is("1"));
+        assertThat(
+            "institution.institutions",
+            affiliation.getInstitutions(),
+            is(Arrays.asList("University of Science", "University of Madness"))
+        );
+    }
+
+    @Test
+    @Ignore("we replace line feed with a space")
+    public void shouldExtractSecondInstitutionAsSeparateAffiliationIfNewLine() throws Exception {
+        List<Affiliation> affiliations = this.processLabelResults(new String[][] {
+            {"1", "I-<marker>"},
+            {"University", "I-<institution>"},
+            {"of", "<institution>"},
+            {"Science", "<institution>"},
+            {"\n"},
+            {"University", "I-<institution>"},
+            {"of", "<institution>"},
+            {"Madness", "<institution>"}
+        });
+        assertThat("should have one affiliation", affiliations, is(hasSize(2)));
         Affiliation affiliation = affiliations.get(0);
         assertThat("institution.marker", affiliation.getMarker(), is("1"));
         assertThat(
