@@ -85,10 +85,10 @@ public class AffiliationAddressParserTest {
         return Joiner.on("\n").join(resultLines);
     }
 
-    @Test
-    public void shouldExtractSimpleAffiliation() throws Exception {
-        List<String> tokens = Arrays.asList("1", " ", "University", " ", "of", " ", "Science");
-        List<String> labels = Arrays.asList("I-<marker>", "I-<institution>", "<institution>", "<institution>");
+    private List<Affiliation> processLabelResults(
+        List<String> tokens,
+        List<String> labels
+    ) throws Exception {
         List<LayoutToken> tokenizations = this.analyzer.getLayoutTokensForTokenizedText(tokens);
         List<String> affiliationBlocks = AffiliationAddressParser.getAffiliationBlocks(tokenizations);
         String header = FeaturesVectorAffiliationAddress.addFeaturesAffiliationAddress(
@@ -96,10 +96,20 @@ public class AffiliationAddressParserTest {
         );
         String labelResult = addLabelsToFeatures(header, labels);
         LOGGER.debug("labelResult: {}", labelResult);
-        List<Affiliation> result = this.target.resultBuilder(
+        return this.target.resultBuilder(
             labelResult,
             tokenizations,
             NO_USE_PRELABEL
+        );
+    }
+
+    @Test
+    public void shouldExtractSimpleAffiliation() throws Exception {
+        List<String> tokens = Arrays.asList("1", " ", "University", " ", "of", " ", "Science");
+        List<String> labels = Arrays.asList("I-<marker>", "I-<institution>", "<institution>", "<institution>");
+        List<Affiliation> result = this.processLabelResults(
+            tokens,
+            labels
         );
         assertThat("should have one affiliation", result, is(hasSize(1)));
         Affiliation affiliation = result.get(0);
