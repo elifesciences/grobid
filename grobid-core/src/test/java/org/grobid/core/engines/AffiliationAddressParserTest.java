@@ -19,6 +19,7 @@ import java.util.List;
 
 import com.google.common.base.Joiner;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.grobid.core.analyzers.GrobidAnalyzer;
 import org.grobid.core.data.Affiliation;
 import org.grobid.core.factory.GrobidFactory;
@@ -103,14 +104,27 @@ public class AffiliationAddressParserTest {
         );
     }
 
+    private List<Affiliation> processLabelResults(String[][] tokenLabelPairs) throws Exception {
+        ArrayList<String> tokens = new ArrayList<>();
+        ArrayList<String> labels = new ArrayList<>();
+        for (String[] pair: tokenLabelPairs) {
+            if (!tokens.isEmpty()) {
+                tokens.add(" ");
+            }
+            tokens.add(pair[0]);
+            labels.add(pair[1]);
+        }
+        return this.processLabelResults(tokens, labels);
+    }
+
     @Test
     public void shouldExtractSimpleAffiliation() throws Exception {
-        List<String> tokens = Arrays.asList("1", " ", "University", " ", "of", " ", "Science");
-        List<String> labels = Arrays.asList("I-<marker>", "I-<institution>", "<institution>", "<institution>");
-        List<Affiliation> result = this.processLabelResults(
-            tokens,
-            labels
-        );
+        List<Affiliation> result = this.processLabelResults(new String[][] {
+            {"1", "I-<marker>"},
+            {"University", "I-<institution>"},
+            {"of", "<institution>"},
+            {"Science", "<institution>"}
+        });
         assertThat("should have one affiliation", result, is(hasSize(1)));
         Affiliation affiliation = result.get(0);
         assertThat("institution.marker", affiliation.getMarker(), is("1"));
