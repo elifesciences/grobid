@@ -2057,9 +2057,9 @@ public class BiblioItem {
             }
 
             if ( (config.getGenerateTeiCoordinates() != null) && (config.getGenerateTeiCoordinates().contains("persName")) )
-                tei.append(toTEIAuthorBlock(2, true));
+                tei.append(toTEIAuthorBlock(2, true, config));
             else
-                tei.append(toTEIAuthorBlock(2, false));
+                tei.append(toTEIAuthorBlock(2, false, config));
 
             if (!StringUtils.isEmpty(doi)) {
                 for (int i = 0; i < indent + 2; i++) {
@@ -3572,11 +3572,17 @@ public class BiblioItem {
         }*/
     }
 
-
     /**
      * Create the TEI encoding for the author+affiliation block for the current biblio object.
      */
     public String toTEIAuthorBlock(int nbTag, boolean withCoordinates) {
+        return toTEIAuthorBlock(nbTag, withCoordinates, GrobidAnalysisConfig.defaultInstance());
+    }
+
+    /**
+     * Create the TEI encoding for the author+affiliation block for the current biblio object.
+     */
+    public String toTEIAuthorBlock(int nbTag, boolean withCoordinates, GrobidAnalysisConfig config) {
         StringBuffer tei = new StringBuffer();
         int nbAuthors = 0;
         int nbAffiliations = 0;
@@ -3671,6 +3677,21 @@ public class BiblioItem {
                             if (aff.getKey() != null)
                                 tei.append(" key=\"").append(aff.getKey()).append("\"");
                             tei.append(">\n");
+
+                            if (
+                                config.getIncludeRawAffiliations()
+                                && !StringUtils.isEmpty(aff.getRawAffiliationString())
+                            ) {
+                                TextUtilities.appendN(tei, '\t', nbTag + 2);
+                                String encodedRawAffiliationString = TextUtilities.HTMLEncode(
+                                    aff.getRawAffiliationString()
+                                );
+                                tei.append(
+                                    "<note type=\"raw_affiliation\">" +
+                                    encodedRawAffiliationString +
+                                    "</note>\n"
+                                );
+                            }
 
                             if (aff.getDepartments() != null) {
                                 if (aff.getDepartments().size() == 1) {
