@@ -139,6 +139,11 @@ public class AffiliationAddressParserTest {
             affiliation.getInstitutions(),
             is(Arrays.asList("University of Science"))
         );
+        assertThat(
+            "institution.rawAffiliationString",
+            affiliation.getRawAffiliationString(),
+            is("University of Science")
+        );
     }
 
     @Test
@@ -159,6 +164,11 @@ public class AffiliationAddressParserTest {
             "institution.institutions",
             affiliation.getInstitutions(),
             is(Arrays.asList("University of Science", "University of Madness"))
+        );
+        assertThat(
+            "institution.rawAffiliationString",
+            affiliation.getRawAffiliationString(),
+            is("University of Science University of Madness")
         );
     }
 
@@ -204,11 +214,21 @@ public class AffiliationAddressParserTest {
             affiliations.get(0).getInstitutions(),
             is(Arrays.asList("University of Science"))
         );
+        assertThat(
+            "institution.rawAffiliationString",
+            affiliations.get(0).getRawAffiliationString(),
+            is("University of Science")
+        );
         assertThat("institution.marker", affiliations.get(1).getMarker(), is("2"));
         assertThat(
             "institution.institutions",
             affiliations.get(1).getInstitutions(),
             is(Arrays.asList("University of Madness"))
+        );
+        assertThat(
+            "institution.rawAffiliationString",
+            affiliations.get(1).getRawAffiliationString(),
+            is("University of Madness")
         );
     }
 }
