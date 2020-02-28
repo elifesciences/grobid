@@ -19,7 +19,6 @@ import java.util.List;
 
 import com.google.common.base.Joiner;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.grobid.core.analyzers.GrobidAnalyzer;
 import org.grobid.core.data.Affiliation;
 import org.grobid.core.factory.GrobidFactory;
@@ -132,6 +131,33 @@ public class AffiliationAddressParserTest {
             "institution.institutions",
             affiliation.getInstitutions(),
             is(Arrays.asList("University of Science"))
+        );
+    }
+
+    @Test
+    public void shouldExtractMultipleAffiliations() throws Exception {
+        List<Affiliation> affiliations = this.processLabelResults(new String[][] {
+            {"1", "I-<marker>"},
+            {"University", "I-<institution>"},
+            {"of", "<institution>"},
+            {"Science", "<institution>"},
+            {"2", "I-<marker>"},
+            {"University", "I-<institution>"},
+            {"of", "<institution>"},
+            {"Madness", "<institution>"}
+        });
+        assertThat("should have one affiliation", affiliations, is(hasSize(2)));
+        assertThat("institution.marker", affiliations.get(0).getMarker(), is("1"));
+        assertThat(
+            "institution.institutions",
+            affiliations.get(0).getInstitutions(),
+            is(Arrays.asList("University of Science"))
+        );
+        assertThat("institution.marker", affiliations.get(1).getMarker(), is("2"));
+        assertThat(
+            "institution.institutions",
+            affiliations.get(1).getInstitutions(),
+            is(Arrays.asList("University of Madness"))
         );
     }
 }
