@@ -70,6 +70,19 @@ public class AffiliationAddressParserTest {
         );
         assertThat("affiliations should be null", result, is(nullValue()));
     }
+    private static List<String> getAffiliationBlocksWithLineFeed(List<LayoutToken> tokenizations) {
+        ArrayList<String> affiliationBlocks = new ArrayList<String>();
+        for(LayoutToken tok : tokenizations) {
+            if (tok.getText().length() == 0) continue;
+            if (!tok.getText().equals(" ")) {
+                if (tok.getText().equals("\n")) {
+                    affiliationBlocks.add("@newline");
+                } else
+                    affiliationBlocks.add(tok + " <affiliation>");
+            }
+        }
+        return affiliationBlocks;
+    }
 
     private static String addLabelsToFeatures(String header, List<String> labels) {
         String[] headerLines = header.split("\n");
@@ -92,7 +105,7 @@ public class AffiliationAddressParserTest {
     ) throws Exception {
         List<LayoutToken> tokenizations = this.analyzer.getLayoutTokensForTokenizedText(tokens);
         LOGGER.debug("tokenizations: {}", tokenizations);
-        List<String> affiliationBlocks = AffiliationAddressParser.getAffiliationBlocks(tokenizations);
+        List<String> affiliationBlocks = getAffiliationBlocksWithLineFeed(tokenizations);
         String header = FeaturesVectorAffiliationAddress.addFeaturesAffiliationAddress(
             affiliationBlocks, Arrays.asList(tokenizations), NO_PLACES_POSITIONS
         );
@@ -173,7 +186,6 @@ public class AffiliationAddressParserTest {
     }
 
     @Test
-    @Ignore("we replace line feed with a space")
     public void shouldExtractSecondInstitutionAsSeparateAffiliationIfNewLine() throws Exception {
         List<Affiliation> affiliations = this.processLabelResults(new String[][] {
             {"1", "I-<marker>"},
@@ -186,12 +198,27 @@ public class AffiliationAddressParserTest {
             {"Madness", "<institution>"}
         });
         assertThat("should have one affiliation", affiliations, is(hasSize(2)));
-        Affiliation affiliation = affiliations.get(0);
-        assertThat("institution.marker", affiliation.getMarker(), is("1"));
+        assertThat("(0).institution.marker", affiliations.get(0).getMarker(), is("1"));
         assertThat(
-            "institution.institutions",
-            affiliation.getInstitutions(),
-            is(Arrays.asList("University of Science", "University of Madness"))
+            "(0).institution.institutions",
+            affiliations.get(0).getInstitutions(),
+            is(Arrays.asList("University of Science"))
+        );
+        assertThat(
+            "(0).institution.rawAffiliationString",
+            affiliations.get(0).getRawAffiliationString(),
+            is("University of Science")
+        );
+        assertThat("(1).institution.marker", affiliations.get(1).getMarker(), is("1"));
+        assertThat(
+            "(1).institution.institutions",
+            affiliations.get(1).getInstitutions(),
+            is(Arrays.asList("University of Madness"))
+        );
+        assertThat(
+            "(1).institution.rawAffiliationString",
+            affiliations.get(1).getRawAffiliationString(),
+            is("University of Madness")
         );
     }
 

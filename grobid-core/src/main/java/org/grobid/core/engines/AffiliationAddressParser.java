@@ -305,16 +305,6 @@ public class AffiliationAddressParser extends AbstractParser {
                     useMarker = true;
                 }
 
-                if (!s1.endsWith("<marker>")) {
-                    if (aff.getRawAffiliationString() == null) {
-                        aff.setRawAffiliationString(s2);
-                    } else if (addSpace) {
-                        aff.setRawAffiliationString(aff.getRawAffiliationString() + " " + s2);
-                    } else {
-                        aff.setRawAffiliationString(aff.getRawAffiliationString() + s2);
-                    }
-                }
-
                 if (newMarker) {
                     if (aff.notNull()) {
                         if (fullAffiliations == null)
@@ -712,6 +702,16 @@ public class AffiliationAddressParser extends AbstractParser {
                         } else {
                             aff.setAffiliationString(s2);
                         }
+                    }
+                }
+
+                if (!s1.endsWith("<marker>")) {
+                    if (aff.getRawAffiliationString() == null) {
+                        aff.setRawAffiliationString(s2);
+                    } else if (addSpace) {
+                        aff.setRawAffiliationString(aff.getRawAffiliationString() + " " + s2);
+                    } else {
+                        aff.setRawAffiliationString(aff.getRawAffiliationString() + s2);
                     }
                 }
 
