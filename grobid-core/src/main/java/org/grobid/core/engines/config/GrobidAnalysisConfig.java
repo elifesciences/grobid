@@ -46,6 +46,9 @@ public class GrobidAnalysisConfig {
     // if consolidate header
     private int consolidateHeader = 0;
 
+    // if the raw affiliation string should be included in the parsed results
+    private boolean includeRawAffiliations = false;
+
     // if the raw bibliographical string should be included in the parsed results
     private boolean includeRawCitations = false;
 
@@ -89,6 +92,11 @@ public class GrobidAnalysisConfig {
 
         public GrobidAnalysisConfigBuilder consolidateCitations(int consolidate) {
             config.consolidateCitations = consolidate;
+            return this;
+        }
+
+        public GrobidAnalysisConfigBuilder includeRawAffiliations(boolean rawAffiliations) {
+            config.includeRawAffiliations = rawAffiliations;
             return this;
         }
 
@@ -181,6 +189,10 @@ public class GrobidAnalysisConfig {
 
     public int getConsolidateHeader() {
         return consolidateHeader;
+    }
+
+    public boolean getIncludeRawAffiliations() {
+        return includeRawAffiliations;
     }
 
     public boolean getIncludeRawCitations() {

@@ -17,6 +17,7 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import org.grobid.core.engines.config.GrobidAnalysisConfig;
 import org.grobid.core.utilities.GrobidProperties;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -28,11 +29,16 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.empty;
 
 
 public class BiblioItemTest {
 
     public static final Logger LOGGER = LoggerFactory.getLogger(BiblioItemTest.class);
+
+    private GrobidAnalysisConfig.GrobidAnalysisConfigBuilder configBuilder = (
+        new GrobidAnalysisConfig.GrobidAnalysisConfigBuilder()
+    );
 
     @BeforeClass
     public static void init() {
@@ -60,7 +66,8 @@ public class BiblioItemTest {
     }
 
     @Test
-    public void shouldGnerateRawAffiliationText() throws Exception {
+    public void shouldGnerateRawAffiliationTextIfEnabled() throws Exception {
+        GrobidAnalysisConfig config = configBuilder.includeRawAffiliations(true).build();
         Affiliation aff = new Affiliation();
         aff.setRawAffiliationString("raw affiliation 1");
         Person author = new Person();
@@ -69,13 +76,34 @@ public class BiblioItemTest {
         BiblioItem biblioItem = new BiblioItem();
         biblioItem.setFullAuthors(Arrays.asList(author));
         biblioItem.setFullAffiliations(Arrays.asList(aff));
-        String tei = biblioItem.toTEI(2);
+        String tei = biblioItem.toTEI(0, 2, config);
         LOGGER.debug("tei: {}", tei);
         Document doc = parseXml(tei);
         assertThat(
             "raw_affiliation",
             getXpathStrings(doc, "//note[@type=\"raw_affiliation\"]/text()"),
             is(Arrays.asList("raw affiliation 1"))
+        );
+    }
+
+    @Test
+    public void shouldNotGnerateRawAffiliationTextIfNotEnabled() throws Exception {
+        GrobidAnalysisConfig config = configBuilder.includeRawAffiliations(false).build();
+        Affiliation aff = new Affiliation();
+        aff.setRawAffiliationString("raw affiliation 1");
+        Person author = new Person();
+        author.setLastName("Smith");
+        author.setAffiliations(Arrays.asList(aff));
+        BiblioItem biblioItem = new BiblioItem();
+        biblioItem.setFullAuthors(Arrays.asList(author));
+        biblioItem.setFullAffiliations(Arrays.asList(aff));
+        String tei = biblioItem.toTEI(0, 2, config);
+        LOGGER.debug("tei: {}", tei);
+        Document doc = parseXml(tei);
+        assertThat(
+            "raw_affiliation",
+            getXpathStrings(doc, "//note[@type=\"raw_affiliation\"]/text()"),
+            is(empty())
         );
     }
 }
