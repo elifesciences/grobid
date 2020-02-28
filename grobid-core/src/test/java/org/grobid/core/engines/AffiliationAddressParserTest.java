@@ -118,19 +118,40 @@ public class AffiliationAddressParserTest {
 
     @Test
     public void shouldExtractSimpleAffiliation() throws Exception {
-        List<Affiliation> result = this.processLabelResults(new String[][] {
+        List<Affiliation> affiliations = this.processLabelResults(new String[][] {
             {"1", "I-<marker>"},
             {"University", "I-<institution>"},
             {"of", "<institution>"},
             {"Science", "<institution>"}
         });
-        assertThat("should have one affiliation", result, is(hasSize(1)));
-        Affiliation affiliation = result.get(0);
+        assertThat("should have one affiliation", affiliations, is(hasSize(1)));
+        Affiliation affiliation = affiliations.get(0);
         assertThat("institution.marker", affiliation.getMarker(), is("1"));
         assertThat(
             "institution.institutions",
             affiliation.getInstitutions(),
             is(Arrays.asList("University of Science"))
+        );
+    }
+
+    @Test
+    public void shouldExtractMultipleInstitutions() throws Exception {
+        List<Affiliation> affiliations = this.processLabelResults(new String[][] {
+            {"1", "I-<marker>"},
+            {"University", "I-<institution>"},
+            {"of", "<institution>"},
+            {"Science", "<institution>"},
+            {"University", "I-<institution>"},
+            {"of", "<institution>"},
+            {"Madness", "<institution>"}
+        });
+        assertThat("should have one affiliation", affiliations, is(hasSize(1)));
+        Affiliation affiliation = affiliations.get(0);
+        assertThat("institution.marker", affiliation.getMarker(), is("1"));
+        assertThat(
+            "institution.institutions",
+            affiliation.getInstitutions(),
+            is(Arrays.asList("University of Science", "University of Madness"))
         );
     }
 
