@@ -796,6 +796,13 @@ public class GrobidProperties {
         return theFile;
     }
 
+    public static Boolean isFeatureFlag(String featureName) {
+        return Utilities.stringToBoolean(getPropertyValue(
+            GrobidPropertyKeys.PROP_FEATURE_FLAG_PREFIX + featureName,
+            "false"
+        ));
+    }
+
     public static String getLexiconPath() {
         return new File(get_GROBID_HOME_PATH(), "lexicon").getAbsolutePath();
     }

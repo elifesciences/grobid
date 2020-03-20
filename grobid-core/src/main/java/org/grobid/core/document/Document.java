@@ -35,6 +35,7 @@ import org.grobid.core.sax.*;
 
 import org.grobid.core.utilities.BoundingBoxCalculator;
 import org.grobid.core.utilities.ElementCounter;
+import org.grobid.core.utilities.GrobidProperties;
 import org.grobid.core.utilities.LayoutTokensUtil;
 import org.grobid.core.utilities.Pair;
 import org.grobid.core.utilities.TextUtilities;
@@ -480,7 +481,9 @@ public class Document implements Serializable {
         }
 
         // we filter out possible line numbering for review works
-        // filterLineNumber();
+        if (GrobidProperties.isFeatureFlag("remove_line_numbers")) {
+            new LineNumberFilter().findAndRemoveLineNumbers(this.getBlocks());
+        }
         return tokenizations;
     }
 
