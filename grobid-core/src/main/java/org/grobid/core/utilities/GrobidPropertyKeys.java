@@ -29,6 +29,8 @@ public interface GrobidPropertyKeys {
     String PROP_HEADER_USE_HEURISTICS = "grobid.header.use_heuristics";
     String PROP_HEADER_USE_LABELED_ABSTRACT = "grobid.header.use_labeled_abstract";
 
+    String PROP_FEATURE_FLAG_PREFIX = "grobid.features.";
+
     String PROP_CROSSREF_ID = "grobid.crossref_id";
     String PROP_CROSSREF_PW = "grobid.crossref_pw";
     String PROP_CROSSREF_HOST = "grobid.crossref_host";
