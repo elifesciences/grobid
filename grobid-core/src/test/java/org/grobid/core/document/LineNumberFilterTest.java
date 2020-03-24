@@ -78,6 +78,23 @@ public class LineNumberFilterTest {
     }
 
     @Test
+    public void shouldNotFailOnVeryLargeNumberToken() {
+        List<LayoutToken> largeNumberTokens = this.createLineNumberTokens(
+            1, 1, 10.0, 10.0
+        );
+        // change the text to a large number
+        for (LayoutToken largeNumberToken: largeNumberTokens) {
+            largeNumberToken.setText("12345678901");
+        }
+        Block block = createBlock(largeNumberTokens);
+        assertThat(
+            "lineNumberTokens",
+            this.getLineNumberLayoutTokens(Arrays.asList(block)),
+            empty()
+        );
+    }
+
+    @Test
     public void shouldMatchLeftLineNumbers() {
         List<LayoutToken> lineNumberTokens = this.createLineNumberTokens(
             1, 10, 10.0, 10.0
