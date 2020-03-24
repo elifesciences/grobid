@@ -119,7 +119,13 @@ class LineNumberFilter {
                 String tokenText = token.getText();
                 Matcher lineNumberMatcher = lineNumberPattern.matcher(tokenText);
                 if (lineNumberMatcher.matches()) {
-                    int lineNumber = Integer.parseInt(tokenText);
+                    int lineNumber;
+                    try {
+                        lineNumber = Integer.parseInt(tokenText);
+                    } catch (NumberFormatException e) {
+                        // it's probably not a line number after all
+                        continue;
+                    }
                     LineNumberToken lineNumberToken = new LineNumberToken(
                         block, token, documentPosition++, lineNumber
                     );
