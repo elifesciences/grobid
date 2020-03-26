@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 
 class LineNumberFilter {
-    class LineNumberToken {
+    static class LineNumberToken {
         private Block block;
         private LayoutToken layoutToken;
         private int documentPosition;
@@ -270,11 +270,17 @@ class LineNumberFilter {
     public void removeTokenFromBlock(Block block, LayoutToken token) {
         List<LayoutToken> blockTokens = new ArrayList<>(block.getTokens());
         block.resetTokens();
+        boolean removeNextSpace = false;
         for (LayoutToken blockToken: blockTokens) {
             if (blockToken == token) {
+                removeNextSpace = true;
+                continue;
+            }
+            if (removeNextSpace && blockToken.getText().equals(" ")) {
                 continue;
             }
             block.addToken(blockToken);
+            removeNextSpace = false;
         }
     }
 

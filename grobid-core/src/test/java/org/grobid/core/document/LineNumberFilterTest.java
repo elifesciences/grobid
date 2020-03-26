@@ -206,4 +206,32 @@ public class LineNumberFilterTest {
             is(ListUtils.union(pageOneLineNumberTokens, pageTwoLineNumberTokens))
         );
     }
+
+    @Test
+    public void shouldUpdateBlockTextWhenRemovingLineNumbers() {
+        LayoutToken lineNumberToken = createLayoutToken("1", 10, 10);
+        LayoutToken spaceToken = createLayoutToken(" ", 20, 10);
+        List<LayoutToken> otherTokens = Arrays.asList(
+            createLayoutToken("other", 30, 10),
+            createLayoutToken(" ", 40, 10),
+            createLayoutToken("text", 50, 10)
+        );
+        Block block = createBlock(ListUtils.union(
+            ListUtils.union(
+                Arrays.asList(lineNumberToken),
+                Arrays.asList(spaceToken)
+            ),
+            otherTokens
+        ));
+        block.setPage(new Page(1));
+        block.setText("1 other text");
+        assertThat("block.text (before)", block.getText(), is("1 other text"));
+        this.filter.removeLineNumberTokens(Arrays.asList(new LineNumberFilter.LineNumberToken(
+            block,
+            lineNumberToken,
+            1,
+            1
+        )));
+        assertThat("block.text (after)", block.getText(), is("other text"));
+    }
 }
