@@ -441,6 +441,15 @@ public class Document implements Serializable {
             throw new GrobidException("PDF parsing resulted in empty content", GrobidExceptionStatus.NO_BLOCKS);
         }
 
+        // we filter out possible line numbering for review works
+        if (GrobidProperties.isFeatureFlag("remove_line_numbers")) {
+            LineNumberFilter lineNumberFilter = new LineNumberFilter();
+            lineNumberFilter.findAndRemoveLineNumbers(this.getBlocks());
+            tokenizations = lineNumberFilter.recalculateDocumentTokenization(
+                this.getBlocks()
+            );
+        }
+
         // calculating main area
         calculatePageMainAreas();
 
@@ -480,10 +489,6 @@ public class Document implements Serializable {
             }
         }
 
-        // we filter out possible line numbering for review works
-        if (GrobidProperties.isFeatureFlag("remove_line_numbers")) {
-            new LineNumberFilter().findAndRemoveLineNumbers(this.getBlocks());
-        }
         return tokenizations;
     }
 
