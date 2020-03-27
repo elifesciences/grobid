@@ -226,12 +226,15 @@ public class LineNumberFilterTest {
         block.setPage(new Page(1));
         block.setText("1 other text");
         assertThat("block.text (before)", block.getText(), is("1 other text"));
-        this.filter.removeLineNumberTokens(Arrays.asList(new LineNumberFilter.LineNumberToken(
-            block,
-            lineNumberToken,
-            1,
-            1
-        )));
+        this.filter.removeLineNumberTokens(
+            Arrays.asList(block),
+            Arrays.asList(new LineNumberFilter.LineNumberToken(
+                block,
+                lineNumberToken,
+                1,
+                1
+            ))
+        );
         assertThat("block.text (after)", block.getText(), is("other text"));
     }
 }

@@ -8,6 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.grobid.core.layout.Block;
 import org.grobid.core.layout.LayoutToken;
 import org.grobid.core.layout.Page;
@@ -67,12 +68,6 @@ class LineNumberFilter {
         }
     }
 
-    private Comparator<LineNumberToken> byLineNumber = (
-        LineNumberToken token1, LineNumberToken token2
-    ) -> Integer.valueOf(token1.getLineNumber()).compareTo(
-        token2.getLineNumber()
-    );
-
     private Comparator<LineNumberToken> byPageAndLineNumber = (
         LineNumberToken token1, LineNumberToken token2
     ) -> (
@@ -106,12 +101,12 @@ class LineNumberFilter {
             List<LayoutToken> tokens = block.getTokens();
             LayoutToken previousBlockToken = null;
             for (LayoutToken token: tokens) {
+                if (token.getX() < 0 || token.getY() < 0) {
+                    continue;
+                }
                 boolean newLine = (
                     (previousBlockToken == null)
-                    || (
-                        (previousBlockToken.getY() < token.getY())
-                        && (previousBlockToken.getX() >= token.getX())
-                    )
+                    || (previousBlockToken.getX() >= token.getX())
                 );
                 if (!newLine) {
                     continue;
@@ -198,6 +193,12 @@ class LineNumberFilter {
         List<LineNumberToken> lineNumberTokensCandidates = (
             this.getLineNumberTokenCandidates(blocks)
         );
+        logger.debug(
+            "line number candidates: {}",
+            lineNumberTokensCandidates.stream()
+            .map((LineNumberToken token) -> token.getLineNumber())
+            .collect(Collectors.toList())
+        );
         if (lineNumberTokensCandidates.size() < this.minLineNumbers) {
             return Collections.emptyList();
         }
@@ -268,23 +269,36 @@ class LineNumberFilter {
     }
 
     public void removeTokenFromBlock(Block block, LayoutToken token) {
+        if (block.getTokens() == null) {
+            return;
+        }
         List<LayoutToken> blockTokens = new ArrayList<>(block.getTokens());
         block.resetTokens();
+        block.setText("");
         boolean removeNextSpace = false;
+        boolean tokenFound = false;
         for (LayoutToken blockToken: blockTokens) {
             if (blockToken == token) {
+                tokenFound = true;
                 removeNextSpace = true;
+                block.setStartToken(block.getStartToken() + 1);
                 continue;
             }
-            if (removeNextSpace && blockToken.getText().equals(" ")) {
+            if (removeNextSpace && StringUtils.isBlank(blockToken.getText())) {
                 continue;
             }
             block.addToken(blockToken);
             removeNextSpace = false;
         }
+        if (!tokenFound) {
+            throw new RuntimeException("token not found in block: " + token);
+        }
+        block.setText("removed line no: " + block.getText());
     }
 
-    public void removeLineNumberTokens(List<LineNumberToken> lineNumberTokens) {
+    public void removeLineNumberTokens(
+            List<Block> blocks,
+            List<LineNumberToken> lineNumberTokens) {
         for (LineNumberToken lineNumberToken: lineNumberTokens) {
             this.removeTokenFromBlock(
                 lineNumberToken.getBlock(),
@@ -293,8 +307,28 @@ class LineNumberFilter {
         }
     }
 
+    public List<LayoutToken> recalculateDocumentTokenization(
+            List<Block> blocks) {
+        List<LayoutToken> tokenization = new ArrayList<>();
+        for (Block block: blocks) {
+            if (block.getTokens() == null) {
+                continue;
+            }
+            block.setStartToken(tokenization.size());
+            block.setEndToken(tokenization.size() + block.getTokens().size());
+            tokenization.addAll(block.getTokens());
+        }
+        return tokenization;
+    }
+
     public void findAndRemoveLineNumbers(List<Block> blocks) {
         List<LineNumberToken> lineNumberTokens = this.getLineNumberTokens(blocks);
-        removeLineNumberTokens(lineNumberTokens);
+        removeLineNumberTokens(blocks, lineNumberTokens);
+        logger.info(
+            "removed line numbers: {}",
+            lineNumberTokens.stream()
+            .map((LineNumberToken token) -> token.getLineNumber())
+            .collect(Collectors.toList())
+        );
     }
 }
