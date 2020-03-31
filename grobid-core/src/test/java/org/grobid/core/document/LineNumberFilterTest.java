@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.empty;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.collections4.ListUtils;
@@ -236,5 +237,41 @@ public class LineNumberFilterTest {
             ))
         );
         assertThat("block.text (after)", block.getText(), is("other text"));
+    }
+
+    @Test
+    public void shouldResetStartAndEndBlockOfNonEmptyAndEmptyBlocks() {
+        Block nonEmptyBlock = createBlock(Arrays.asList(
+            createLayoutToken("token", 5, 5)
+        ));
+        nonEmptyBlock.setStartToken(100);
+        nonEmptyBlock.setEndToken(200);
+        Block emptyBlock = createBlock(Collections.emptyList());
+        emptyBlock.setStartToken(100);
+        emptyBlock.setEndToken(200);
+        List<LayoutToken> tokens = this.filter.recalculateDocumentTokenization(Arrays.asList(
+            nonEmptyBlock, emptyBlock
+        ));
+        assertThat("tokens", tokens, is(nonEmptyBlock.getTokens()));
+        assertThat(
+            "nonEmptyBlock.startToken",
+            nonEmptyBlock.getStartToken(),
+            is(0)
+        );
+        assertThat(
+            "nonEmptyBlock.endToken",
+            nonEmptyBlock.getEndToken(),
+            is(nonEmptyBlock.getTokens().size())
+        );
+        assertThat(
+            "emptyBlock.startToken",
+            emptyBlock.getStartToken(),
+            is(nonEmptyBlock.getEndToken())
+        );
+        assertThat(
+            "emptyBlock.endToken",
+            emptyBlock.getEndToken(),
+            is(nonEmptyBlock.getEndToken())
+        );
     }
 }
