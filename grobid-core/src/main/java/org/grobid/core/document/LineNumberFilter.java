@@ -311,10 +311,11 @@ class LineNumberFilter {
             List<Block> blocks) {
         List<LayoutToken> tokenization = new ArrayList<>();
         for (Block block: blocks) {
+            block.setStartToken(tokenization.size());
             if (block.getTokens() == null) {
+                block.setEndToken(tokenization.size());
                 continue;
             }
-            block.setStartToken(tokenization.size());
             block.setEndToken(tokenization.size() + block.getTokens().size());
             tokenization.addAll(block.getTokens());
         }
