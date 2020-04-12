@@ -15,9 +15,7 @@ import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class GrobidPropertiesTest {
@@ -256,33 +254,6 @@ public class GrobidPropertiesTest {
     }
 
     @Test
-    public void testShouldReturnWapitiModelForSegmentationAndFulltextIfDelftWasConfigured() {
-        GrobidProperties.getProps().put(
-            GrobidPropertyKeys.PROP_GROBID_CRF_ENGINE,
-            GrobidCRFEngine.DELFT.name()
-        );
-        GrobidProperties.getProps().remove(
-            GrobidPropertyKeys.PROP_GROBID_CRF_ENGINE + "."
-            + GrobidModels.SEGMENTATION.getModelName()
-        );
-        GrobidProperties.getProps().remove(
-            GrobidPropertyKeys.PROP_GROBID_CRF_ENGINE + "."
-            + GrobidModels.FULLTEXT.getModelName()
-        );
-        GrobidProperties.loadCrfEngine();
-        assertEquals(
-            "segmentation engine",
-            GrobidCRFEngine.WAPITI,
-            GrobidProperties.getGrobidCRFEngine(GrobidModels.SEGMENTATION)
-        );
-        assertEquals(
-            "fulltext engine",
-            GrobidCRFEngine.WAPITI,
-            GrobidProperties.getGrobidCRFEngine(GrobidModels.FULLTEXT)
-        );
-    }
-
-    @Test
     public void testShouldAllowModelSpecificEngineConfiguration() {
         GrobidProperties.getProps().put(
             GrobidPropertyKeys.PROP_GROBID_CRF_ENGINE,
@@ -308,6 +279,26 @@ public class GrobidPropertiesTest {
             "fulltext engine",
             GrobidCRFEngine.DELFT,
             GrobidProperties.getGrobidCRFEngine(GrobidModels.FULLTEXT)
+        );
+    }
+
+
+    @Test
+    public void testShouldReplaceHyphenWithUnderscoreForModelSpecificEngineConfiguration() {
+        GrobidProperties.getProps().put(
+            GrobidPropertyKeys.PROP_GROBID_CRF_ENGINE,
+            GrobidCRFEngine.WAPITI.name()
+        );
+        GrobidProperties.getProps().put(
+            GrobidPropertyKeys.PROP_GROBID_CRF_ENGINE + "."
+            + "model_name1",
+            GrobidCRFEngine.DELFT.name()
+        );
+        GrobidProperties.loadCrfEngine();
+        assertEquals(
+            "segmentation engine",
+            GrobidCRFEngine.DELFT,
+            GrobidProperties.getGrobidCRFEngine("model-name1")
         );
     }
 
