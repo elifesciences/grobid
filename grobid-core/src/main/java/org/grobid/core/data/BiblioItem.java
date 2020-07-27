@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 public class BiblioItem {
     protected static final Logger LOGGER = LoggerFactory.getLogger(BiblioItem.class);
 
-    LanguageUtilities languageUtilities = LanguageUtilities.getInstance();
+    private LanguageUtilities languageUtilities = LanguageUtilities.getInstance();
     private AuthorEmailAssigner authorEmailAssigner = new ClassicAuthorEmailAssigner();
     private EmailSanitizer emailSanitizer = new EmailSanitizer();
     private String teiId;
@@ -2074,10 +2074,7 @@ public class BiblioItem {
                 // if it's not something in English, we will write it anyway as note without type at the end
             }
 
-            if ( (config.getGenerateTeiCoordinates() != null) && (config.getGenerateTeiCoordinates().contains("persName")) )
-                tei.append(toTEIAuthorBlock(2, true, config));
-            else
-                tei.append(toTEIAuthorBlock(2, false, config));
+            tei.append(toTEIAuthorBlock(2, config));
 
             if (!StringUtils.isEmpty(doi)) {
                 for (int i = 0; i < indent + 2; i++) {
@@ -3593,18 +3590,24 @@ public class BiblioItem {
     /**
      * Create the TEI encoding for the author+affiliation block for the current biblio object.
      */
-    public String toTEIAuthorBlock(int nbTag, boolean withCoordinates) {
-        return toTEIAuthorBlock(nbTag, withCoordinates, GrobidAnalysisConfig.defaultInstance());
+    public String toTEIAuthorBlock(int nbTag) {
+        return toTEIAuthorBlock(nbTag, GrobidAnalysisConfig.defaultInstance());
     }
 
     /**
      * Create the TEI encoding for the author+affiliation block for the current biblio object.
      */
-    public String toTEIAuthorBlock(int nbTag, boolean withCoordinates, GrobidAnalysisConfig config) {
+    public String toTEIAuthorBlock(int nbTag, GrobidAnalysisConfig config) {
         StringBuffer tei = new StringBuffer();
         int nbAuthors = 0;
         int nbAffiliations = 0;
         int nbAddresses = 0;
+
+        boolean withCoordinates = false;
+        if (config != null && config.getGenerateTeiCoordinates() != null) {
+            withCoordinates = config.getGenerateTeiCoordinates().contains("persName");
+        }
+
         // uncomment below when collaboration will be concretely added to headers
         /*
         if ( (collaboration != null) && 
@@ -3785,7 +3788,7 @@ public class BiblioItem {
                 aff.getRawAffiliationString()
             );
             tei.append("<note type=\"raw_affiliation\">");
-            LOGGER.info("marker: {}", aff.getMarker());
+            LOGGER.debug("marker: {}", aff.getMarker());
             if (StringUtils.isNotEmpty(aff.getMarker())) {
                 tei.append("<label>");
                 tei.append(aff.getMarker());
