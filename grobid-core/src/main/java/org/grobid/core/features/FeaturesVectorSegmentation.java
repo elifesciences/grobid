@@ -9,6 +9,8 @@ import org.grobid.core.utilities.TextUtilities;
  * @author Patrice Lopez
  */
 public class FeaturesVectorSegmentation {
+    public static final String NBSP = "\u00A0";
+
     public LayoutToken token = null; // not a feature, reference value
 	public String line = null; // not a feature, the complete processed line
 	
@@ -52,6 +54,12 @@ public class FeaturesVectorSegmentation {
     
     public int spacingWithPreviousBlock = 0; // discretized 
     public int characterDensity = 0; // discretized 
+
+    public boolean wholeLineFeatureEnabled = false; // if true, adds a feature with the whole line at the end
+
+    public static String formatFeatureText(String text) {
+        return text.stripTrailing().replaceAll(" |\t", NBSP);
+    }
 
     public String printVector() {
         if (string == null) return null;
@@ -235,6 +243,10 @@ public class FeaturesVectorSegmentation {
               res.append(" 0\n");
           */
 
+        if (this.wholeLineFeatureEnabled) {
+            res.append(" ");
+            res.append(formatFeatureText(this.line));
+        }
         res.append("\n");
 
         return res.toString();
