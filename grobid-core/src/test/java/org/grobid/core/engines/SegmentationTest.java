@@ -78,7 +78,7 @@ public class SegmentationTest {
             String[] splittedOutput = output.split("\n");
 
             assertThat(splittedOutput[1], startsWith("Bill"));
-            String[] featuresVector = splittedOutput[1].stripTrailing().split(" ");
+            String[] featuresVector = splittedOutput[1].strip().split(" ");
             String lastVectorString = featuresVector[featuresVector.length - 1];
             String line = "Bill, Jim, and Scott were at a convention together and were";
             assertThat(

@@ -58,7 +58,7 @@ public class FeaturesVectorSegmentation {
     public boolean wholeLineFeatureEnabled = false; // if true, adds a feature with the whole line at the end
 
     public static String formatFeatureText(String text) {
-        return text.stripTrailing().replaceAll(" |\t", NBSP);
+        return text.strip().replaceAll(" |\t", NBSP);
     }
 
     public String printVector() {
