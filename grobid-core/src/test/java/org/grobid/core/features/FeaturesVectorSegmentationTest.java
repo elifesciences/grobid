@@ -48,7 +48,7 @@ public class FeaturesVectorSegmentationTest {
     @Test
     public void shouldNotAddWholeLineFeatureIfEnabled() {
         this.features.wholeLineFeatureEnabled = false;
-        String[] featuresVector = features.printVector().strip().split(" ");
+        String[] featuresVector = features.printVector().trim().split(" ");
         String lastVectorString = featuresVector[featuresVector.length - 1];
         assertThat(
             "last feature",
