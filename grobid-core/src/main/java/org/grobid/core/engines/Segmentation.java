@@ -69,6 +69,8 @@ public class Segmentation extends AbstractParser {
     // projection scale for line length
     private static final int LINESCALE = 10;
 
+    public static final String WHOLE_LINE_FEATURE_FEATURE_FLAG = "segmentation_whole_line_feature";
+
     private LanguageUtilities languageUtilities = LanguageUtilities.getInstance();
     private FeatureFactory featureFactory = FeatureFactory.getInstance();
 
@@ -308,6 +310,10 @@ public class Segmentation extends AbstractParser {
         FeaturesVectorSegmentation features;
         FeaturesVectorSegmentation previousFeatures = null;
 
+        boolean wholeLineFeatureEnabled = GrobidProperties.isFeatureFlag(
+            WHOLE_LINE_FEATURE_FEATURE_FLAG
+        );
+
         for (Page page : doc.getPages()) {
             pageHeight = page.getHeight();
             newPage = true;
@@ -414,6 +420,7 @@ public class Segmentation extends AbstractParser {
                     features = new FeaturesVectorSegmentation();
                     features.token = token;
                     features.line = line;
+                    features.wholeLineFeatureEnabled = wholeLineFeatureEnabled;
 
                     if ( (blockIndex < 2) || (blockIndex > page.getBlocks().size()-2)) {
                         String pattern = featureFactory.getPattern(line);

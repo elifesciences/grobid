@@ -4,6 +4,9 @@ import org.grobid.core.document.Document;
 import org.grobid.core.document.DocumentSource;
 import org.grobid.core.engines.config.GrobidAnalysisConfig;
 import org.grobid.core.factory.AbstractEngineFactory;
+import org.grobid.core.features.FeaturesVectorSegmentation;
+import org.grobid.core.utilities.GrobidProperties;
+import org.grobid.core.utilities.GrobidPropertyKeys;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -35,6 +38,10 @@ public class SegmentationTest {
     @Before
     public void setUp() throws Exception {
         target = new Segmentation();
+        GrobidProperties.getProps().put(
+            GrobidPropertyKeys.PROP_FEATURE_FLAG_PREFIX + Segmentation.WHOLE_LINE_FEATURE_FEATURE_FLAG,
+            "false"
+        );
     }
 
     @Test
@@ -53,6 +60,35 @@ public class SegmentationTest {
         assertThat(splittedOutput[0], is("Title Title title T Ti Tit Titl BLOCKSTART PAGESTART NEWFONT HIGHERFONT 1 0 INITCAP NODIGIT 0 0 1 0 0 0 0 0 12 12 no 0 10 0 0 0 0 1"));
 		
 		doc.close(true, true, true);
+    }
+
+    @Test
+    public void test_GetAllLinesFeatures_shouldAddWholeLineFeatureIfEnabled() throws Exception {
+        GrobidProperties.getProps().put(
+            GrobidPropertyKeys.PROP_FEATURE_FLAG_PREFIX + Segmentation.WHOLE_LINE_FEATURE_FEATURE_FLAG,
+            "true"
+        );
+        File input = new File(this.getClass().getResource("samplePdf.segmentation.pdf").toURI());
+        DocumentSource doc = DocumentSource.fromPdf(input);
+        try {
+            final Document document = new Document(doc);
+            document.addTokenizedDocument(GrobidAnalysisConfig.defaultInstance());
+            String output = target.getAllLinesFeatured(document);
+
+            String[] splittedOutput = output.split("\n");
+
+            assertThat(splittedOutput[1], startsWith("Bill"));
+            String[] featuresVector = splittedOutput[1].trim().split(" ");
+            String lastVectorString = featuresVector[featuresVector.length - 1];
+            String line = "Bill, Jim, and Scott were at a convention together and were";
+            assertThat(
+                "last feature value",
+                lastVectorString,
+                is(FeaturesVectorSegmentation.formatFeatureText(line))
+            );
+        } finally {
+            doc.close(true, true, true);
+        }
     }
 
     @Test
