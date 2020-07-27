@@ -5,6 +5,7 @@ import static org.junit.Assert.assertThat;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -59,7 +60,7 @@ public class FeaturesVectorSegmentationTest {
     @Test
     public void shouldAddWholeLineFeatureIfEnabled() {
         this.features.wholeLineFeatureEnabled = true;
-        String[] featuresVector = features.printVector().strip().split(" ");
+        String[] featuresVector = features.printVector().trim().split(" ");
         String lastVectorString = featuresVector[featuresVector.length - 1];
         assertThat(
             "last feature",
