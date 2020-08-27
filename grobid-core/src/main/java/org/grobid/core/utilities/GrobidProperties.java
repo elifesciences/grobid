@@ -342,7 +342,7 @@ public class GrobidProperties {
 
     protected static Map<String, String> getEnvironmentVariableOverrides(Map<String, String> environmentVariablesMap) {
         Map<String, String> properties = new EnvironmentVariableProperties(
-            environmentVariablesMap, "GROBID__"
+            environmentVariablesMap, "(GROBID__|ORG__GROBID__).+"
         ).getProperties();
         LOGGER.info("environment variables overrides: {}", properties);
         return properties;
@@ -426,11 +426,11 @@ public class GrobidProperties {
         return new File(getPropertyValue(GrobidPropertyKeys.PROP_NATIVE_LIB_PATH));
     }
 
-    public static boolean isHeaderUseHeuristics() {
+    /*public static boolean withSentenceSegmentation() {
         return Utilities.stringToBoolean(
-            getPropertyValue(GrobidPropertyKeys.PROP_HEADER_USE_HEURISTICS, "true")
+            getPropertyValue(GrobidPropertyKeys.PROP_WITH_SENTENCE_SEGMENTATION, "false")
         );
-    }
+    }*/
 
     public static boolean isHeaderUseLabeledAbstract() {
         return Utilities.stringToBoolean(
@@ -673,6 +673,14 @@ public class GrobidProperties {
      */
     public static void setUseLanguageId(final String useLanguageId) {
         setPropertyValue(GrobidPropertyKeys.PROP_USE_LANG_ID, useLanguageId);
+    }
+
+    public static String getSentenceDetectorFactory() {
+        String factoryClassName = getPropertyValue(GrobidPropertyKeys.PROP_SENTENCE_DETECTOR_FACTORY);
+        if (StringUtils.isBlank(factoryClassName)) {
+            throw new GrobidPropertyException("Sentence detection is enabled but a factory class name is not provided");
+        }
+        return factoryClassName;
     }
 
     /**

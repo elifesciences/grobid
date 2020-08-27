@@ -197,30 +197,6 @@ public class GrobidPropertiesTest {
     }
 
     @Test
-    public void testShouldUseHeaderHeuristicsByDefault() {
-        GrobidProperties.getProps().remove(GrobidPropertyKeys.PROP_HEADER_USE_HEURISTICS);
-        assertTrue("header use heuristics", GrobidProperties.isHeaderUseHeuristics());
-    }
-
-    @Test
-    public void testShouldNotUseHeaderHeuristicsIfDisabled() {
-        GrobidProperties.getProps().put(GrobidPropertyKeys.PROP_HEADER_USE_HEURISTICS, "false");
-        assertFalse("header use heuristics", GrobidProperties.isHeaderUseHeuristics());
-    }
-
-    @Test
-    public void testShouldUseHeaderLabeledAbstractByDefault() {
-        GrobidProperties.getProps().remove(GrobidPropertyKeys.PROP_HEADER_USE_LABELED_ABSTRACT);
-        assertTrue("header use labeled abstract", GrobidProperties.isHeaderUseLabeledAbstract());
-    }
-
-    @Test
-    public void testShouldNotUseHeaderLabeledAbstractIfDisabled() {
-        GrobidProperties.getProps().put(GrobidPropertyKeys.PROP_HEADER_USE_LABELED_ABSTRACT, "false");
-        assertFalse("header use labeled abstract", GrobidProperties.isHeaderUseLabeledAbstract());
-    }
-
-    @Test
     public void testsetisResourcesInHome() {
         String value = "true";
         GrobidProperties.setResourcesInHome(value);
@@ -237,6 +213,18 @@ public class GrobidPropertiesTest {
             GrobidCRFEngine.WAPITI,
             GrobidProperties.getGrobidCRFEngine("dummy")
         );
+    }
+
+    @Test
+    public void testShouldUseHeaderLabeledAbstractByDefault() {
+        GrobidProperties.getProps().remove(GrobidPropertyKeys.PROP_HEADER_USE_LABELED_ABSTRACT);
+        assertTrue("header use labeled abstract", GrobidProperties.isHeaderUseLabeledAbstract());
+    }
+
+    @Test
+    public void testShouldNotUseHeaderLabeledAbstractIfDisabled() {
+        GrobidProperties.getProps().put(GrobidPropertyKeys.PROP_HEADER_USE_LABELED_ABSTRACT, "false");
+        assertFalse("header use labeled abstract", GrobidProperties.isHeaderUseLabeledAbstract());
     }
 
     @Test
