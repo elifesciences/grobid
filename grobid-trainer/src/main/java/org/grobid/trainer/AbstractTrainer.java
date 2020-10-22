@@ -81,6 +81,26 @@ public abstract class AbstractTrainer implements Trainer {
         return createCRFPPData(corpusDir, trainingOutputPath, null, 1.0);
     }
 
+    public static boolean isGenerateDataOnly() {
+        return "1".equals(System.getenv("GROBID__FEATURES__GENERATE_DATA_ONLY"));
+    }
+
+    public void saveGeneratedData(File dataPath) {
+        File generatedDataPath = new File(
+            GrobidProperties.getGrobidHomePath(), "generated-data"
+        );
+        File outputFile = new File(generatedDataPath, dataPath.getName());
+        generatedDataPath.mkdirs();
+        try {
+            java.nio.file.Files.copy(
+                dataPath.toPath(), outputFile.toPath(),
+                java.nio.file.StandardCopyOption.REPLACE_EXISTING
+            );
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     public void train() {
         final File dataPath = trainDataPath;
@@ -102,6 +122,10 @@ public abstract class AbstractTrainer implements Trainer {
         }
         final File tempModelPath = new File(GrobidProperties.getModelPath(model).getAbsolutePath() + NEW_MODEL_EXT);
         final File oldModelPath = GrobidProperties.getModelPath(model);
+        if (isGenerateDataOnly()) {
+            saveGeneratedData(dataPath);
+            return;
+        }
         trainer.train(getTemplatePath(), dataPath, tempModelPath, GrobidProperties.getNBThreads(), model);
         // if we are here, that means that training succeeded
         // rename model for CRF sequence labellers (not with DeLFT deep learning models)
@@ -130,6 +154,10 @@ public abstract class AbstractTrainer implements Trainer {
     @Override
     public String evaluate(boolean includeRawResults) {
         createCRFPPData(getEvalCorpusPath(), evalDataPath);
+        if (isGenerateDataOnly()) {
+            saveGeneratedData(evalDataPath);
+            return "generated data only";
+        }
         return EvaluationUtilities.evaluateStandard(evalDataPath.getAbsolutePath(), getTagger()).toString(includeRawResults);
     }
 
@@ -616,6 +644,10 @@ public abstract class AbstractTrainer implements Trainer {
     }
 
     public static String runNFoldEvaluation(final Trainer trainer, int numFolds) {
+        if (isGenerateDataOnly()) {
+            AbstractTrainer.runTraining(trainer);
+            return AbstractTrainer.runEvaluation(trainer);
+        }
         return runNFoldEvaluation(trainer, numFolds, false);
     }
 
