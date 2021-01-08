@@ -946,10 +946,12 @@ public class Document implements Serializable {
             for (Figure f : figureMap.get(pageNum)) {
                 List<LayoutToken> realCaptionTokens = getFigureLayoutTokens(f);
                 if (realCaptionTokens != null && !realCaptionTokens.isEmpty()) {
-                    f.setLayoutTokens(realCaptionTokens);
-                    f.setTextArea(BoundingBoxCalculator.calculate(realCaptionTokens));
-                    f.setCaption(new StringBuilder(LayoutTokensUtil.toText(LayoutTokensUtil.dehyphenize(realCaptionTokens))));
-                    f.setCaptionLayoutTokens(realCaptionTokens);
+                    if (!GrobidProperties.isFeatureFlag("no_figure_update_caption")) {
+                        f.setLayoutTokens(realCaptionTokens);
+                        f.setTextArea(BoundingBoxCalculator.calculate(realCaptionTokens));
+                        f.setCaption(new StringBuilder(LayoutTokensUtil.toText(LayoutTokensUtil.dehyphenize(realCaptionTokens))));
+                        f.setCaptionLayoutTokens(realCaptionTokens);
+                    }
                     pageFigures.add(f);
                 }
             }
