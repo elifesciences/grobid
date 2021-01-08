@@ -73,18 +73,6 @@ public class GrobidPropertiesTest {
                 .getNativeLibraryPath().getCanonicalFile());
     }
 
-    public void testIsDeLFTRedirectOutputFalseByDefault() throws IOException {
-        assertFalse(GrobidProperties.isDeLFTRedirectOutput());
-    }
-
-    @Test
-    public void testIsDeLFTRedirectOutputTrueIfSet() throws IOException {
-        GrobidProperties.getProps().put(
-            GrobidPropertyKeys.PROP_GROBID_DELFT_REDIRECT_OUTPUT, "true"
-        );
-        assertTrue(GrobidProperties.isDeLFTRedirectOutput());
-    }
-
     @Test
     public void testDeLFTPackageWithDefaultPackage() throws IOException {
         GrobidProperties.getProps().remove(
@@ -186,22 +174,6 @@ public class GrobidPropertiesTest {
                 GrobidProperties.getNBThreads().toString());
         assertTrue("The property is not greater than zero",
             GrobidProperties.getNBThreads().intValue() > 0);
-    }
-
-    @Test
-    public void testsetisUseLanguageId() {
-        String value = "true";
-        GrobidProperties.setUseLanguageId(value);
-        assertTrue("The property has not the value expected",
-                GrobidProperties.isUseLanguageId());
-    }
-
-    @Test
-    public void testsetisResourcesInHome() {
-        String value = "true";
-        GrobidProperties.setResourcesInHome(value);
-        assertTrue("The property has not the value expected",
-                GrobidProperties.isResourcesInHome());
     }
 
     @Test
@@ -353,7 +325,6 @@ public class GrobidPropertiesTest {
 
     @Test(expected = GrobidPropertyException.class)
     public void testgetLanguageDetectorFactory_shouldThrowException() {
-        GrobidProperties.setUseLanguageId("true");
         GrobidProperties.getProps().put(
                 GrobidPropertyKeys.PROP_LANG_DETECTOR_FACTORY, "");
         GrobidProperties.getLanguageDetectorFactory();
@@ -363,13 +334,11 @@ public class GrobidPropertiesTest {
     public void testgetLanguageDetectorFactory2_shouldThrowException() {
         GrobidProperties.getProps().put(
                 GrobidPropertyKeys.PROP_LANG_DETECTOR_FACTORY, "");
-        GrobidProperties.setUseLanguageId("true");
         GrobidProperties.getLanguageDetectorFactory();
     }
 
     @Test
     public void testgetLanguageDetectorFactory() {
-        GrobidProperties.setUseLanguageId("false");
         assertEquals("The property has not the value expected",
                 "org.grobid.core.lang.impl.CybozuLanguageDetectorFactory",
                 GrobidProperties.getLanguageDetectorFactory());

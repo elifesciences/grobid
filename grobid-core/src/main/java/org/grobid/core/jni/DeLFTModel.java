@@ -30,9 +30,11 @@ public class DeLFTModel {
 
     // Exploit JNI CPython interpreter to execute load and execute a DeLFT deep learning model 
     private String modelName;
+    private String architecture;
 
     public DeLFTModel(GrobidModel model, String architecture) {
         this.modelName = model.getModelName().replace("-", "_");
+        this.architecture = architecture;
         try {
             LOGGER.info("Loading DeLFT model for " + model.getModelName() + " with architecture " + architecture + "...");            
             JEPThreadPool.getInstance().run(new InitModel(this.modelName, GrobidProperties.getInstance().getModelPath(), architecture));
@@ -59,7 +61,8 @@ public class DeLFTModel {
                 LOGGER.debug("DeLFTModel, loading model: {}", modelPath.getAbsolutePath());
                 String fullModelName = this.modelName.replace("_", "-");
 
-                if (architecture != null && !architecture.equals("BidLSTM_CRF"))
+                //if (architecture != null && !architecture.equals("BidLSTM_CRF"))
+                if (architecture != null)
                     fullModelName += "-" + this.architecture;
 
                 if (GrobidProperties.getInstance().useELMo() && modelName.toLowerCase().indexOf("bert") == -1)
@@ -76,11 +79,13 @@ public class DeLFTModel {
     private class LabelTask implements Callable<String> { 
         private String data;
         private String modelName;
+        private String architecture;
 
-        public LabelTask(String modelName, String data) { 
+        public LabelTask(String modelName, String data, String architecture) { 
             //System.out.println("label thread: " + Thread.currentThread().getId());
             this.modelName = modelName;
             this.data = data;
+            this.architecture = architecture;
         }
 
         private void setJepStringValueWithFileFallback(
@@ -113,9 +118,12 @@ public class DeLFTModel {
 
                 // load and tag
                 this.setJepStringValueWithFileFallback(jep, "input", this.data);
-                Boolean useFeatures = jep.getValue(
-                    "getattr(" + this.modelName + ".model_config, 'use_features', False)",
-                    Boolean.class
+                Boolean useFeatures = (
+                    (architecture.indexOf("FEATURE") != -1)
+                    | jep.getValue(
+                        "getattr(" + this.modelName + ".model_config, 'use_features', False)",
+                        Boolean.class
+                    )
                 );
                 LOGGER.debug("useFeatures: {}", useFeatures);
                 jep.eval("x_all, f_all = load_data_crf_string(input)");
@@ -138,34 +146,38 @@ public class DeLFTModel {
                 String inputLine;
                 int i = 0; // sentence index
                 int j = 0; // word index in the sentence
-                List<List<String>> result = results.get(0);
-                while ((inputLine = bufReader.readLine()) != null) {
-                    inputLine = inputLine.trim();
-                    if ((inputLine.length() == 0) && (j != 0)) {
-                        j = 0;
-                        i++;
-                        if (i == results.size())
-                            break;
-                        result = results.get(i);
-                        continue;
-                    }
+                if (results.size() > 0) {
+                    List<List<String>> result = results.get(0);
+                    while ((inputLine = bufReader.readLine()) != null) {
+                        inputLine = inputLine.trim();
+                        if ((inputLine.length() == 0) && (j != 0)) {
+                            j = 0;
+                            i++;
+                            if (i == results.size())
+                                break;
+                            result = results.get(i);
+                            continue;
+                        }
 
-                    if (inputLine.length() == 0)
-                        continue;
-                    labelledData.append(inputLine);
-                    labelledData.append(" ");
+                        if (inputLine.length() == 0) {
+                            labelledData.append("\n");
+                            continue;
+                        }
+                        labelledData.append(inputLine);
+                        labelledData.append(" ");
 
-                    if (j >= result.size()) {
-                        labelledData.append(TaggingLabels.OTHER_LABEL);
-                    } else {
-                        List<String> pair = result.get(j);
-                        // first is the token, second is the label (DeLFT format)
-                        String token = pair.get(0);
-                        String label = pair.get(1);
-                        labelledData.append(DeLFTModel.delft2grobidLabel(label));
+                        if (j >= result.size()) {
+                            labelledData.append(TaggingLabels.OTHER_LABEL);
+                        } else {
+                            List<String> pair = result.get(j);
+                            // first is the token, second is the label (DeLFT format)
+                            String token = pair.get(0);
+                            String label = pair.get(1);
+                            labelledData.append(DeLFTModel.delft2grobidLabel(label));
+                        }
+                        labelledData.append("\n");
+                        j++;
                     }
-                    labelledData.append("\n");
-                    j++;
                 }
                 
                 // cleaning
@@ -186,7 +198,7 @@ public class DeLFTModel {
     public String label(String data) {
         String result = null;
         try {
-            result = JEPThreadPool.getInstance().call(new LabelTask(this.modelName, data));
+            result = JEPThreadPool.getInstance().call(new LabelTask(this.modelName, data, this.architecture));
         } catch(InterruptedException e) {
             LOGGER.error("DeLFT model " + this.modelName + " labelling interrupted", e);
         } catch(ExecutionException e) {
@@ -194,7 +206,8 @@ public class DeLFTModel {
         }
         // In some areas, GROBID currently expects tabs as feature separators.
         // (Same as in WapitiModel.label)
-        result = result.replaceAll(" ", "\t");
+        if (result != null)
+            result = result.replaceAll(" ", "\t");
         return result;
     }
 
