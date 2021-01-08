@@ -1281,7 +1281,15 @@ public class Document implements Serializable {
                     BoundingBox prevBlock = BoundingBox.fromPointAndDimensions(figBlock.getPageNumber(), figBlock.getX(), figBlock.getY(), figBlock.getWidth(), figBlock.getHeight());
                     blockPtr = it.next();
                     Block b = getBlocks().get(blockPtr);
-                    if (BoundingBox.fromPointAndDimensions(b.getPageNumber(), b.getX(), b.getY(), b.getWidth(), b.getHeight()).distanceTo(prevBlock) < 15) {
+                    double distanceToPreviousBlock = (
+                        BoundingBox.fromPointAndDimensions(
+                            b.getPageNumber(), b.getX(), b.getY(), b.getWidth(), b.getHeight()
+                        ).distanceTo(prevBlock)
+                    );
+                    if (
+                        GrobidProperties.isFeatureFlag("no_figure_distance_rules")
+                        | distanceToPreviousBlock < 15
+                    ) {
                         result.addAll(b.getTokens());
                         figBlock = b;
                     } else {
