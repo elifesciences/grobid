@@ -119,8 +119,8 @@ public class DeLFTModel {
                 // load and tag
                 this.setJepStringValueWithFileFallback(jep, "input", this.data);
                 Boolean useFeatures = (
-                    (architecture.indexOf("FEATURE") != -1)
-                    | jep.getValue(
+                    (architecture != null && architecture.indexOf("FEATURE") != -1)
+                    || jep.getValue(
                         "getattr(" + this.modelName + ".model_config, 'use_features', False)",
                         Boolean.class
                     )
