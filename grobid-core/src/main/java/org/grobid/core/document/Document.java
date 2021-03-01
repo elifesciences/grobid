@@ -421,6 +421,16 @@ public class Document implements Serializable {
             throw new GrobidException("PDF parsing resulted in empty content", GrobidExceptionStatus.NO_BLOCKS);
         }
 
+        if (GrobidProperties.isFeatureFlag("clear_document_if_low_token_length_ratio")) {
+            TokenLengthRatioFilter tokenLengthRatioFilter = new TokenLengthRatioFilter();
+            double tokenLengthRatio = tokenLengthRatioFilter.getNonBlankTokenLengthRatio(this.getBlocks());
+            if (tokenLengthRatio < 1.5) {
+                LOGGER.info("clearing document due to token length ratio: {}", tokenLengthRatio);
+                tokenLengthRatioFilter.clearBlocks(this.getBlocks());
+                tokenizations = new ArrayList<LayoutToken>();
+            }
+        }
+
         // we filter out possible line numbering for review works
         if (GrobidProperties.isFeatureFlag("remove_line_numbers")) {
             LineNumberFilter lineNumberFilter = new LineNumberFilter();
