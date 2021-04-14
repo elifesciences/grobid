@@ -1131,7 +1131,10 @@ public class TEIFormatter {
                                     BiblioItem biblio,
                                     List<BibDataSet> bds,
                                     List<LayoutToken> tokenizations,
-                                    Document doc,
+                                    List<Figure> figures,
+                                    List<Table> tables,
+                                    List<Equation> equations,
+                                     Document doc,
                                     GrobidAnalysisConfig config) throws Exception {
         if ((result == null) || (tokenizations == null)) {
             return buffer;
@@ -1139,7 +1142,7 @@ public class TEIFormatter {
 
         buffer.append("\t\t\t<div type=\"annex\">\n");
         buffer = toTEITextPiece(buffer, result, biblio, bds, true,
-                new LayoutTokenization(tokenizations), null, null, null, doc, config);
+                new LayoutTokenization(tokenizations), figures, tables, equations, doc, config);
         buffer.append("\t\t\t</div>\n");
 
         return buffer;
