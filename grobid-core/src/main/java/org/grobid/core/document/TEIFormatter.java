@@ -1134,7 +1134,7 @@ public class TEIFormatter {
                                     List<Figure> figures,
                                     List<Table> tables,
                                     List<Equation> equations,
-                                     Document doc,
+                                    Document doc,
                                     GrobidAnalysisConfig config) throws Exception {
         if ((result == null) || (tokenizations == null)) {
             return buffer;
